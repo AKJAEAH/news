@@ -22,29 +22,48 @@
     <main>
         <section id="haberler">
             <h2>Son Haberler</h2>
-            <?php
-            $feed_url = 'https://feeds.bbci.co.uk/turkce/rss.xml'; // Genel haberlerin RSS URL'si
-            $feed_xml = simplexml_load_file($feed_url);
-            if ($feed_xml) {
-                foreach ($feed_xml->channel->item as $item) {
-                    $title = $item->title;
-                    $link = $item->link;
-                    $description = $item->description;
-                    echo "<article>";
-                    echo "<h3>$title</h3>";
-                    echo "<p>$description</p>";
-                    echo "<a href='$link'>Devamını Oku</a>";
-                    echo "</article>";
-                }
-            } else {
-                echo "<p>RSS beslemesi yüklenemedi.</p>";
-            }
-            ?>
+            <div id="haber-listesi">
+            </div>
         </section>
     </main>
 
     <footer>
         <p>&copy; 2024 Günlük Haberler</p>
     </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const haberlerURL = 'https://feeds.bbci.co.uk/turkce/rss.xml'; // Genel haberlerin RSS URL'si
+            const haberListesi = document.getElementById('haber-listesi');
+
+            fetch(haberlerURL)
+                .then(response => response.text())
+                .then(data => {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(data, 'text/xml');
+                    const haberler = xmlDoc.querySelectorAll('item');
+
+                    haberler.forEach(haber => {
+                        const baslik = haber.querySelector('title').textContent;
+                        const link = haber.querySelector('link').textContent;
+                        const aciklama = haber.querySelector('description').textContent;
+
+                        const haberHTML = `
+                            <article>
+                                <h3>${baslik}</h3>
+                                <p>${aciklama}</p>
+                                <a href="${link}" target="_blank">Devamını Oku</a>
+                            </article>
+                        `;
+
+                        haberListesi.innerHTML += haberHTML;
+                    });
+                })
+                .catch(error => {
+                    console.error('Haberler yüklenirken hata oluştu:', error);
+                    haberListesi.innerHTML = '<p>Haberler yüklenemedi.</p>';
+                });
+        });
+    </script>
 </body>
 </html>
