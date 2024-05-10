@@ -1,69 +1,42 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Günlük Haberler</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Türkçe Haberler</title>
 </head>
 <body>
-    <header>
-        <h1>Günlük Haberler</h1>
-        <nav>
-            <ul>
-                <li><a href="#anasayfa">Anasayfa</a></li>
-                <li><a href="#haberler">Haberler</a></li>
-                <li><a href="#hakkimizda">Hakkımızda</a></li>
-                <li><a href="#iletisim">İletişim</a></li>
-            </ul>
-        </nav>
-    </header>
+  <h1>Türkçe Haberler</h1>
+  <ul id="haberListesi"></ul>
 
-    <main>
-        <section id="haberler">
-            <h2>Son Haberler</h2>
-            <div id="haber-listesi">
-            </div>
-        </section>
-    </main>
+  <script>
+    function haberleriGetir(rssURL) {
+      fetch(rssURL)
+        .then(response => response.text())
+        .then(str => new DOMParser().parseFromString(str, "text/xml"))
+        .then(data => {
+          const items = data.querySelectorAll("item");
+          let haberListesi = document.getElementById("haberListesi");
 
-    <footer>
-        <p>&copy; 2024 Günlük Haberler</p>
-    </footer>
+          items.forEach(item => {
+            let baslik = item.querySelector("title").textContent;
+            let link = item.querySelector("link").textContent;
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const haberlerURL = 'https://feeds.bbci.co.uk/turkce/rss.xml'; // Genel haberlerin RSS URL'si
-            const haberListesi = document.getElementById('haber-listesi');
+            let haberItem = document.createElement("li");
+            let haberLink = document.createElement("a");
+            haberLink.textContent = baslik;
+            haberLink.href = link;
+            haberLink.target = "_blank";
 
-            fetch(haberlerURL)
-                .then(response => response.text())
-                .then(data => {
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(data, 'text/xml');
-                    const haberler = xmlDoc.querySelectorAll('item');
+            haberItem.appendChild(haberLink);
+            haberListesi.appendChild(haberItem);
+          });
+        })
+        .catch(error => console.error('Hata:', error));
+    }
 
-                    haberler.forEach(haber => {
-                        const baslik = haber.querySelector('title').textContent;
-                        const link = haber.querySelector('link').textContent;
-                        const aciklama = haber.querySelector('description').textContent;
-
-                        const haberHTML = `
-                            <article>
-                                <h3>${baslik}</h3>
-                                <p>${aciklama}</p>
-                                <a href="${link}" target="_blank">Devamını Oku</a>
-                            </article>
-                        `;
-
-                        haberListesi.innerHTML += haberHTML;
-                    });
-                })
-                .catch(error => {
-                    console.error('Haberler yüklenirken hata oluştu:', error);
-                    haberListesi.innerHTML = '<p>Haberler yüklenemedi.</p>';
-                });
-        });
-    </script>
+    // Haberleri getir
+    haberleriGetir('https://www.bbc.com/turkce/index.xml'); // veya başka bir RSS URL'si
+  </script>
 </body>
 </html>
